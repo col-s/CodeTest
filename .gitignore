@@ -1,3 +1,4 @@
 .DS_Store
 Test.wpr
 Test.wpu
+*.pyc
