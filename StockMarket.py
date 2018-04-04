@@ -17,6 +17,7 @@ class StockMarket(object):
             stocks = OrderedDict() of namedtuple
         """
         self._stocks = stocks
+        self._precision = 2
 
 
     @property
@@ -33,7 +34,21 @@ class StockMarket(object):
         totalSharePrices = 1
         for k, v in self.stocks.iteritems():
             totalSharePrices *= v.price
-        return round(totalSharePrices**(1.0/len(self.stocks)), 2)
+        return round(totalSharePrices**(1.0/len(self.stocks)), self._precision)
+
+    @property
+    def precision(self):
+        """Precision of decimal place"""
+        return self._precision
+
+    @precision.setter
+    def precision(self, val):
+        """Sets the precision"""
+        if val >= 0:
+            self._precision = val
+        else:
+            self._precision = 0
+            print 'Minimum precision amount is 0.'
 
     def addStock(self, stock):
         """adds a stock object to the stock list"""
@@ -58,6 +73,8 @@ class Stock(object):
         self._parValue = parValue
         self._price = price
         self._trades = {}
+        self._precision = 2
+        self._invalidPriceWarning = 'Invalid price, must be greater than 0.0, please try again.'
 
     @property
     def name(self):
@@ -72,7 +89,10 @@ class Stock(object):
     @price.setter
     def price(self, val):
         """Sets the stock price"""
-        self._price = val
+        if val > 0:
+            self._price = val
+        else:
+            raise ValueError(self._invalidPriceWarning)
 
     @property
     def lastDividend(self):
@@ -84,19 +104,37 @@ class Stock(object):
         """Set last dividend of stock"""
         self._lastDividend = val
 
+    @property
+    def precision(self):
+        """Precision of decimal place"""
+        return self._precision
+
+    @precision.setter
+    def precision(self, val):
+        """Sets the precision"""
+        if val >= 0:
+            self._precision = val
+        else:
+            self._precision = 0
+            print 'Minimum precision amount is 0.'
+
     def calcDividend(self, price):
         """calculates the dividend based on the stock type"""
         if price > 0:
-            return round(float(self.lastDividend) / price, 2)
+            return round(float(self.lastDividend) / price, self._precision)
         else:
-            return 'Invalid price, please try again'
+            return self._invalidPriceWarning
 
     def calcPERatio(self, price):
         """calculates the PE Ratio"""
-        try:
-            return round(price / float(self.lastDividend), 2)
-        except ZeroDivisionError:
-            return 0
+        if price > 0:
+            try:
+                return round(price / float(self.lastDividend), self._precision)
+            except ZeroDivisionError:
+                # where the last dividend was zero we return a value of zero
+                return 0
+        else:
+            return self._invalidPriceWarning
 
     def calcVolWeightPrice(self, time=15):
         """
@@ -112,7 +150,7 @@ class Stock(object):
         for trade in trades:
             totalCost += trade.price * trade.quantity
             totalQuantity += trade.quantity
-        return round(float(totalCost) / totalQuantity, 2)
+        return round(float(totalCost) / totalQuantity, self._precision)
 
     def recordTrade(self, price, quantity, buy=True, currency='£'):
         """
@@ -121,6 +159,11 @@ class Stock(object):
         Stores each transaction in a dictionary with timestamp as key
         and tuple of share price and number of shares traded
         """
+        if price <= 0:
+            return self._invalidPriceWarning
+        if quantity <= 0:
+            return 'Invalid quantity, must be greater than 0, please try again.'
+        
         timeStamp = datetime.datetime.now()
         self._trades[timeStamp] = Trade(price, quantity)
         indicator = 'bought' if buy else 'sold'
@@ -168,6 +211,6 @@ class StockPreferred(Stock):
     def calcDividend(self, price):
         """calculates the dividend based on the stock type"""
         if price > 0:
-            return round((float(self._fixedDividend * self._parValue) / 100) / price, 2)
+            return round((float(self._fixedDividend * self._parValue) / 100) / price, self._precision)
         else:
-            return 'Invalid price, please try again'
+            return self._invalidPriceWarning

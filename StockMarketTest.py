@@ -29,19 +29,38 @@ class StockMarketTest(unittest.TestCase):
         self.market = None
 
     def test_dividend(self):
-        price = 10
-        results = [0, 0.8, 2.3, 0.2, 1.3]
-        for stock, result in zip(self.market.stocks.values(), results):
-            self.assertEqual(stock.calcDividend(price), result)
+        testValues = {2: (0, 4, 11.5, 1, 6.5),
+                      10: (0, 0.8, 2.3, 0.2, 1.3),
+                      150: (0, 0.05, 0.15, 0.01, 0.09)}
+        for price, results in testValues.items():
+            for stock, result in zip(self.market.stocks.values(), results):
+                self.assertEqual(stock.calcDividend(price), result)
 
-        self.assertEqual(self.market.stocks['JOE'].calcDividend(0), 'Invalid price, please try again')
-        self.assertEqual(self.market.stocks['GIN'].calcDividend(-1), 'Invalid price, please try again')
+        self.assertEqual(self.market.stocks['JOE'].calcDividend(0),
+                         'Invalid price, must be greater than 0.0, please try again.')
+        self.assertEqual(self.market.stocks['GIN'].calcDividend(-1),
+                         'Invalid price, must be greater than 0.0, please try again.')
 
     def test_calcPERatio(self):
+        testValues = {10: (0, 1.25, 0.43, 1.25, 0.77),
+                      150: (0, 18.75, 6.52, 18.75, 11.54),
+                      5000: (0, 625.0, 217.39, 625.0, 384.62)}
+        for price, results in testValues.items():
+            for stock, result in zip(self.market.stocks.values(), results):
+                self.assertEqual(stock.calcPERatio(price), result)
+                
+        self.assertEqual(self.market.stocks['JOE'].calcPERatio(0),
+                         'Invalid price, must be greater than 0.0, please try again.')
+
+    def test_precision(self):
         price = 10
-        results = [0, 1.25, 0.43, 1.25, 0.77]
-        for stock, result in zip(self.market.stocks.values(), results):
-            self.assertEqual(stock.calcPERatio(price), result)
+        testValues = {0: (0, 1, 0, 1, 1),
+                      1: (0, 1.3, 0.4, 1.3, 0.8),
+                      5: (0, 1.25, 0.43478, 1.25, 0.76923)}
+        for precision, results in testValues.items():
+            for stock, result in zip(self.market.stocks.values(), results):
+                stock.precision = precision
+                self.assertEqual(stock.calcPERatio(price), result)
 
     def test_recordTrade(self):
         price = 10
@@ -49,24 +68,30 @@ class StockMarketTest(unittest.TestCase):
         for stock in self.market.stocks.values():
             for indicator, option in zip(('bought', 'sold'), (True, False)):
                 result = 'Timestamp:%s Number of Shares:%d %s at £%f' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                                              quantity,
-                                                                              indicator,
-                                                                              price)
+                                                                          quantity,
+                                                                          indicator,
+                                                                          price)
                 self.assertEqual(stock.recordTrade(price, quantity, option), result)
 
     def test_calcVolWeightPrice(self):
-        price = 10
-        quantity = 100
-        stock = self.market.stocks['TEA']
-        for _ in range(10):
-            stock.recordTrade(price, quantity)
-            time.sleep(0.01)
-        self.assertEqual(stock.calcVolWeightPrice(), 10)
+        testValues = {10: ((10, 100), (10, 100), (10, 100), (10, 100), (10, 100),
+                           (10, 100), (10, 100), (10, 100), (10, 100), (10, 100)),
+                      7.73: ((8, 150), (11, 89), (15, 10), (7, 300), (4, 50))}
+        stocks = (self.market.stocks['TEA'], self.market.stocks['POP'])
+        for stock, (result, values) in zip(stocks, testValues.items()):
+            for price, quantity in values:
+                stock.recordTrade(price, quantity)
+                time.sleep(0.01)
+            self.assertEqual(stock.calcVolWeightPrice(), result)
 
     def test_allShareIndex(self):
-        for stock in self.market.stocks.values():
-            stock.price = 10
-        self.assertEqual(self.market.allShareIndex, 10)
+        testValues = {10: (10, 10, 10, 10, 10),
+                      8.01:(15, 5, 7, 3, 21),
+                      245.95: (100, 150, 500, 1000, 120)}
+        for index, prices in testValues.items():
+            for stock, price in zip(self.market.stocks.values(), prices):
+                stock.price = price
+            self.assertEqual(self.market.allShareIndex, index)
 
 def suite():
     suite = unittest.TestSuite()
