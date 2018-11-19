@@ -74,7 +74,8 @@ class Stock(object):
         self._price = price
         self._trades = {}
         self._precision = 2
-        self._invalid_price_warning = 'Invalid price, must be greater than 0.0, please try again.'
+        self._invalid_price_warning = 'Invalid price, must be greater' \
+            ' than 0.0, please try again.'
 
     @property
     def name(self):
@@ -144,7 +145,7 @@ class Stock(object):
         """
         trades = self._get_latest_transactions(time)
         if len(trades) == 0:
-            print 'No trades recorded to calculate price in last %d minutes' % time
+            print 'No trades recorded to calculate price in last {} minutes'.format(time)
         total_cost = 0
         total_quantity = 0
         for trade in trades:
@@ -163,15 +164,16 @@ class Stock(object):
             return self._invalid_price_warning
         if quantity <= 0:
             return 'Invalid quantity, must be greater than 0, please try again.'
-        
+
         time_stamp = datetime.datetime.now()
         self._trades[time_stamp] = Trade(price, quantity)
         indicator = 'bought' if buy else 'sold'
-        return 'Timestamp:%s Number of Shares:%d %s at %s%f' % (time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
-                                                                self._trades[time_stamp].quantity,
-                                                                indicator,
-                                                                currency,
-                                                                self._trades[time_stamp].price)
+        return 'Timestamp:{0} Number of Shares: {1} {2} at {3}{4}'.format(
+            time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
+            self._trades[time_stamp].quantity,
+            indicator,
+            currency,
+            self._trades[time_stamp].price)
 
     def _get_latest_transactions(self, time=15):
         """
@@ -211,6 +213,7 @@ class StockPreferred(Stock):
     def calc_dividend(self, price):
         """calculates the dividend based on the stock type"""
         if price > 0:
-            return round((float(self._fixed_dividend * self._par_value) / 100) / price, self._precision)
+            return round((float(self._fixed_dividend * self._par_value)
+                          / 100) / price, self._precision)
         else:
             return self._invalid_price_warning

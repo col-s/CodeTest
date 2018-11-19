@@ -24,6 +24,8 @@ class StockMarketTest(unittest.TestCase):
         self.market = StockMarket.StockMarket(stocks)
         self.market.add_stock(GIN)
         self.market.add_stock(JOE)
+        self.invalid_price = 'Invalid price, must be greater' \
+            ' than 0.0, please try again.'
 
     def tearDown(self):
         self.market = None
@@ -37,9 +39,9 @@ class StockMarketTest(unittest.TestCase):
                 self.assertEqual(stock.calc_dividend(price), result)
 
         self.assertEqual(self.market.stocks['JOE'].calc_dividend(0),
-                         'Invalid price, must be greater than 0.0, please try again.')
+                         self.invalid_price)
         self.assertEqual(self.market.stocks['GIN'].calc_dividend(-1),
-                         'Invalid price, must be greater than 0.0, please try again.')
+                         self.invalid_price)
 
     def test_calc_PE_ratio(self):
         test_values = {10: (0, 1.25, 0.43, 1.25, 0.77),
@@ -48,9 +50,9 @@ class StockMarketTest(unittest.TestCase):
         for price, results in test_values.items():
             for stock, result in zip(self.market.stocks.values(), results):
                 self.assertEqual(stock.calc_PE_ratio(price), result)
-                
+
         self.assertEqual(self.market.stocks['JOE'].calc_PE_ratio(0),
-                         'Invalid price, must be greater than 0.0, please try again.')
+                         self.invalid_price)
 
     def test_precision(self):
         price = 10
@@ -67,15 +69,19 @@ class StockMarketTest(unittest.TestCase):
         quantity = 100
         for stock in self.market.stocks.values():
             for indicator, option in zip(('bought', 'sold'), (True, False)):
-                result = 'Timestamp:%s Number of Shares:%d %s at £%f' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                                          quantity,
-                                                                          indicator,
-                                                                          price)
-                self.assertEqual(stock.record_trade(price, quantity, option), result)
+                result = 'Timestamp:{0} Number of Shares: {1} {2} at £{3}'.format(
+                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    quantity,
+                    indicator,
+                    price)
+                self.assertEqual(stock.record_trade(price, quantity, option),
+                                 result)
 
     def test_calc_vol_weight_price(self):
-        test_values = {10: ((10, 100), (10, 100), (10, 100), (10, 100), (10, 100),
-                           (10, 100), (10, 100), (10, 100), (10, 100), (10, 100)),
+        test_values = {10: ((10, 100), (10, 100), (10, 100),
+                            (10, 100), (10, 100),
+                           (10, 100), (10, 100), (10, 100),
+                           (10, 100), (10, 100)),
                       7.73: ((8, 150), (11, 89), (15, 10), (7, 300), (4, 50))}
         stocks = (self.market.stocks['TEA'], self.market.stocks['POP'])
         for stock, (result, values) in zip(stocks, test_values.items()):
