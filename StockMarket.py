@@ -139,8 +139,8 @@ class Stock(object):
     def calc_vol_weight_price(self, time=15):
         """
         calculates the volume weighted stock price
-        sum ((price * quantity) of each trade) / sum(quantity of each trade)
-        for the total transactions in the given time peroid (minutes)
+        sum ((price * quantity) of each trade) / sum (quantity of each trade)
+        for the total transactions in the given time period (minutes)
         """
         trades = self._get_latest_transactions(time)
         if len(trades) == 0:
@@ -175,10 +175,10 @@ class Stock(object):
 
     def _get_latest_transactions(self, time=15):
         """
-        returns list the latest n transactions in the specified
+        returns list of the latest n transactions in the specified
         time period (minutes)
         Returns: list of tuples (price, quantity) where
-                            price = in of trading price
+                            price = int of trading price
                             quantity = int no of shares traded
         """
         current_time = datetime.datetime.now()
