@@ -69,7 +69,8 @@ class StockMarketTest(unittest.TestCase):
         quantity = 100
         for stock in self.market.stocks.values():
             for indicator, option in zip(('bought', 'sold'), (True, False)):
-                result = 'Timestamp:{0} Number of Shares: {1} {2} at £{3}'.format(
+                result = 'Timestamp:{0} ' \
+                    'Number of Shares: {1} {2} at £{3}'.format(
                     datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     quantity,
                     indicator,

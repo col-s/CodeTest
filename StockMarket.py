@@ -27,14 +27,16 @@ class StockMarket(object):
     @property
     def all_share_index(self):
         """returns GBCE All Share Index
-        Calculates the geometric mean by multiplying all the stock prices in the market
+        Calculates the geometric mean by multiplying
+        all the stock prices in the market
         and returns the nth root where n = number of stocks
         """
         if len(self._stocks) == 0: return 0.0
         total_share_prices = 1
         for k, v in self.stocks.iteritems():
             total_share_prices *= v.price
-        return round(total_share_prices**(1.0/len(self.stocks)), self._precision)
+        return round(total_share_prices**(1.0/len(self.stocks)),
+                     self._precision)
 
     @property
     def precision(self):
@@ -130,7 +132,8 @@ class Stock(object):
         """calculates the PE Ratio"""
         if price > 0:
             try:
-                return round(price / float(self.last_dividend), self._precision)
+                return round(price / float(self.last_dividend),
+                             self._precision)
             except ZeroDivisionError:
                 # where the last dividend was zero we return a value of zero
                 return 0
@@ -145,7 +148,8 @@ class Stock(object):
         """
         trades = self._get_latest_transactions(time)
         if len(trades) == 0:
-            print 'No trades recorded to calculate price in last {} minutes'.format(time)
+            print 'No trades recorded to calculate price' \
+                  ' in last {} minutes'.format(time)
         total_cost = 0
         total_quantity = 0
         for trade in trades:
@@ -163,7 +167,8 @@ class Stock(object):
         if price <= 0:
             return self._invalid_price_warning
         if quantity <= 0:
-            return 'Invalid quantity, must be greater than 0, please try again.'
+            return 'Invalid quantity, must be greater than 0,' \
+                   ' please try again.'
 
         time_stamp = datetime.datetime.now()
         self._trades[time_stamp] = Trade(price, quantity)
@@ -198,7 +203,8 @@ class StockPreferred(Stock):
     """Preferred option stock, inherits from common Stock class"""
 
     #----------------------------------------------------------------------
-    def __init__(self, name, last_dividend, par_value, fixed_dividend, price=0):
+    def __init__(self, name, last_dividend,
+                 par_value, fixed_dividend, price=0):
         """
         Args:
             name = string
@@ -207,7 +213,8 @@ class StockPreferred(Stock):
             price = int share price in pennies
             fixed_dividend = int (percentage)
         """
-        super(StockPreferred, self).__init__(name, last_dividend, par_value, price)
+        super(StockPreferred, self).__init__(name, last_dividend,
+                                             par_value, price)
         self._fixed_dividend = fixed_dividend
 
     def calc_dividend(self, price):
