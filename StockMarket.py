@@ -4,21 +4,19 @@
 import datetime
 from collections import OrderedDict, namedtuple
 
-Trade = namedtuple('Trade',['price','quantity'])
+Trade = namedtuple('Trade', ['price', 'quantity'])
 
-########################################################################
+
 class StockMarket(object):
     """Stock market object"""
 
-    #----------------------------------------------------------------------
-    def __init__(self, stocks=OrderedDict()):
+    def __init__(self, stocks=None):
         """
         Args:
             stocks = OrderedDict() of namedtuple
         """
-        self._stocks = stocks
+        self._stocks = stocks or OrderedDict()
         self._precision = 2
-
 
     @property
     def stocks(self):
@@ -31,12 +29,12 @@ class StockMarket(object):
         all the stock prices in the market
         and returns the nth root where n = number of stocks
         """
-        if len(self._stocks) == 0: return 0.0
+        if len(self._stocks) == 0:
+            return 0.0
         total_share_prices = 1
         for k, v in self.stocks.iteritems():
             total_share_prices *= v.price
-        return round(total_share_prices**(1.0/len(self.stocks)),
-                     self._precision)
+        return round(total_share_prices**(1.0/len(self.stocks)), self._precision)
 
     @property
     def precision(self):
@@ -57,11 +55,9 @@ class StockMarket(object):
         self._stocks[stock.name] = stock
 
 
-########################################################################
 class Stock(object):
     """Common Stock"""
 
-    #----------------------------------------------------------------------
     def __init__(self, name, last_dividend, par_value, price=0):
         """
         Args:
@@ -128,7 +124,7 @@ class Stock(object):
         else:
             return self._invalid_price_warning
 
-    def calc_PE_ratio(self, price):
+    def calc_pe_ratio(self, price):
         """calculates the PE Ratio"""
         if price > 0:
             try:
@@ -194,15 +190,14 @@ class Stock(object):
         for time_stamp, transactionData in reversed(self._trades.items()):
             if time_stamp > start_time:
                 valid_transactions.append(transactionData)
-            else: break
+            else:
+                break
         return valid_transactions
 
 
-########################################################################
 class StockPreferred(Stock):
     """Preferred option stock, inherits from common Stock class"""
 
-    #----------------------------------------------------------------------
     def __init__(self, name, last_dividend,
                  par_value, fixed_dividend, price=0):
         """

@@ -2,3 +2,5 @@
 Test.wpr
 Test.wpu
 *.pyc
+venv/
+.idea/
